@@ -10,6 +10,29 @@ checking
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+library(tidyverse)
+library(signal)
+left = read.csv("All_left.csv")
+right = read.csv("All_right.csv")
+blink = read.csv("All_blink.csv")
+
+left_list = unname(unlist(left))
+right_list = unname(unlist(right))
+blink_list = unname(unlist(blink))
+
+fil_N <- 128 
+fs <- 10000 #sampling rate
+fn <- fs/2
+fc <- c(49,61) # remove frequencies from 49Hz to 61Hz
+fc_norm <- fc/fn
+fir_filter <- fir1(fil_N, fc_norm, type="stop")
+
+filter
+
+left_test = filtfilt(fir_filter,left_list)
+
+ggplot() +
+  geom_point(aes(y = left_test, x = c(1:length(left_test))))
 ```
 
 
