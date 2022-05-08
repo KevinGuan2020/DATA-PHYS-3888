@@ -260,6 +260,7 @@ ggplot() +
                 ymax=Inf), 
             fill = "green", alpha = 0.2)
 ```
+
 ```{r right2}
 right_sd = Classifer(right_list2)
 
@@ -318,18 +319,18 @@ ggplot() +
 ```
 
 ```{r upevents}
-up_events = data.frame(matrix(nrow = 30, ncol = 15002))
+up_events = data.frame(matrix(nrow = 29, ncol = 15002))
 colnames(up_events) = c(1:15001, "Event")
 ```
 
 ```{r up1}
 up_sd = Classifer(up_list1)
 
-up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 9, minpeakheight = 8 , ndown = 5, minpeakdistance = 100)[,2]
+up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 9, minpeakheight = 8 , ndown = 5, minpeakdistance = 200)[,2]
 up_intervals = up_sd[up_peaks,c(1:2)]
 
 for (i in 1:9) {
-  up_events[i,] = c(up_list1[up_intervals[i,1]:up_intervals[i,2]],"L")
+  up_events[i,] = c(up_list1[up_intervals[i,1]:up_intervals[i,2]],"U")
 }
 
 ggplot() +
@@ -338,18 +339,16 @@ ggplot() +
                 xmax=up_intervals$Upper_interval, ymin=-Inf, 
                 ymax=Inf), 
             fill = "green", alpha = 0.2)
-
-ggplot() +
-  geom_line(aes(y = up_sd$sd, x = 1:nrow(up_sd)))
 ```
+
 ```{r up2}
 up_sd = Classifer(up_list2)
 
-up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 9, minpeakheight = 5 , ndown = 5, minpeakdistance = 100)[,2]
+up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 9, minpeakheight = 5 , ndown = 5, minpeakdistance = 200)[,2]
 up_intervals = up_sd[up_peaks,c(1:2)]
 
 for (i in 1:9) {
-  up_events[i+9,] = c(up_list2[up_intervals[i,1]:up_intervals[i,2]],"L")
+  up_events[i+9,] = c(up_list2[up_intervals[i,1]:up_intervals[i,2]],"U")
 }
 
 ggplot() +
@@ -358,40 +357,104 @@ ggplot() +
                 xmax=up_intervals$Upper_interval, ymin=-Inf, 
                 ymax=Inf), 
             fill = "green", alpha = 0.2)
-
-ggplot() +
-  geom_line(aes(y = up_sd$sd, x = 1:nrow(up_sd)))
 ```
 
-```{r up2}
-up_sd = Classifer(up_list2)
+```{r up3}
+up_sd = Classifer(up_list3)
 
-up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 9, minpeakheight = 5 , ndown = 5, minpeakdistance = 100)[,2]
+up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 11, minpeakheight = 5 , ndown = 5, minpeakdistance = 200)[,2]
 up_intervals = up_sd[up_peaks,c(1:2)]
 
-for (i in 1:9) {
-  up_events[i+9,] = c(up_list2[up_intervals[i,1]:up_intervals[i,2]],"L")
+for (i in 1:11) {
+  up_events[i+18,] = c(up_list3[up_intervals[i,1]:up_intervals[i,2]],"U")
 }
 
 ggplot() +
-  geom_line(aes(y = up_list2, x = c(1:length(up_list2)))) +
+  geom_line(aes(y = up_list3, x = c(1:length(up_list3)))) +
   geom_rect(aes(xmin=up_intervals$Lower_interval, 
                 xmax=up_intervals$Upper_interval, ymin=-Inf, 
                 ymax=Inf), 
             fill = "green", alpha = 0.2)
+```
+
+```{r downdata}
+down1 = read.csv("All_down.csv", header = FALSE, sep = ",")
+down_list1 <- split(down1, seq(nrow(down1)))
+down_list1 <- unname(unlist(down_list1))
+
+down2 = read.csv("All_down.txt", header = FALSE, sep = ",")
+down_list2 <- split(down2, seq(nrow(down2)))
+down_list2 <- unname(unlist(down_list2))
+
+down3 = read.csv("All_down_Alen.txt", header = FALSE, sep = ",")
+down_list3 <- split(down3, seq(nrow(down3)))
+down_list3 <- unname(unlist(down_list3))
 
 ggplot() +
-  geom_line(aes(y = up_sd$sd, x = 1:nrow(up_sd)))
-```
-```{r}
-
+  geom_line(aes(y = down_list3, x = c(1:length(down_list3))))
 ```
 
+```{r downevents}
+down_events = data.frame(matrix(nrow = 32, ncol = 15002))
+colnames(down_events) = c(1:15001, "Event")
+```
+
+```{r down1}
+down_sd = Classifer(down_list1)
+
+down_peaks = pracma::findpeaks(down_sd$sd, npeaks = 9, minpeakheight = 13 , ndown = 5, minpeakdistance = 200)[,2]
+down_intervals = down_sd[down_peaks,c(1:2)]
+
+for (i in 1:9) {
+  down_events[i,] = c(down_list1[down_intervals[i,1]:down_intervals[i,2]],"D")
+}
+
+ggplot() +
+  geom_line(aes(y = down_list1, x = c(1:length(down_list1)))) +
+  geom_rect(aes(xmin=down_intervals$Lower_interval, 
+                xmax=down_intervals$Upper_interval, ymin=-Inf, 
+                ymax=Inf), 
+            fill = "green", alpha = 0.2)
+```
+
+```{r down2}
+down_sd = Classifer(down_list2)
+
+down_peaks = pracma::findpeaks(down_sd$sd, npeaks = 12, minpeakheight = 3.58 , ndown = 5, minpeakdistance = 200)[,2]
+down_intervals = down_sd[down_peaks,c(1:2)]
+
+for (i in 1:12) {
+  down_events[i+9,] = c(down_list2[down_intervals[i,1]:down_intervals[i,2]],"D")
+}
+
+ggplot() +
+  geom_line(aes(y = down_list2, x = c(1:length(down_list2)))) +
+  geom_rect(aes(xmin=down_intervals$Lower_interval, 
+                xmax=down_intervals$Upper_interval, ymin=-Inf, 
+                ymax=Inf), 
+            fill = "green", alpha = 0.2)
+```
+
+```{r down3}
+down_sd = Classifer(down_list3)
+
+down_peaks = pracma::findpeaks(down_sd$sd, npeaks = 11, minpeakheight = 10 , ndown = 5, minpeakdistance = 150)[,2]
+down_intervals = down_sd[down_peaks,c(1:2)]
+down_intervals
+for (i in 1:11) {
+  down_events[i+21,] = c(down_list3[down_intervals[i,1]:down_intervals[i,2]],"D")
+}
+
+ggplot() +
+  geom_line(aes(y = down_list3, x = c(1:length(down_list3)))) +
+  geom_rect(aes(xmin=down_intervals$Lower_interval, 
+                xmax=down_intervals$Upper_interval, ymin=-Inf, 
+                ymax=Inf), 
+            fill = "green", alpha = 0.2)
+```
 
 ```{r}
-
-
-test = rbind(left_events, right_events)
+test = rbind(left_events, right_events, up_events, down_events)
 
 test[,15002] = factor(test[,15002])
 
@@ -417,11 +480,8 @@ e1071::svm(x = test[1,1:15001], y = test[1,15002])
 test[,1:15001]
 fit <- predict(svm_res, X_test)
 
-  test[,15002]
-while(max_time > lower_interval + window_size)
-  {
-    upper_interval = lower_interval + window_size
-    interval = wave_seq[lower_interval:upper_interval]
+test[,15002]
+
 
     
 write.csv(test, "Events.csv", row.names = F)
