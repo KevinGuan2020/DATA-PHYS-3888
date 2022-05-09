@@ -18,6 +18,7 @@ Blink = read.csv("All_Blink.txt", header = FALSE, sep = ",")
 Blink_list <- split(Blink, seq(nrow(Blink)))
 Blink_list <- unname(unlist(Blink_list))
 
+Blink
 up = read.csv("All_Up_Alen.txt", header = FALSE, sep = ",")
 up_list <- split(up, seq(nrow(up)))
 up_list <- unname(unlist(up_list))
@@ -169,7 +170,7 @@ left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 8, minpeakheight = 20, ndown
 left_intervals = left_sd[left_peaks,c(1:2)]
 
 for (i in 1:8) {
-  left_events[i,] = c(left_list1[left_intervals[i,1]:left_intervals[i,2]],"L")
+  left_events[i,] = c(left_list1[left_intervals[i,1]:left_intervals[i,2]]-median(left_list1),"L")
 }
 
 ggplot() +
@@ -188,7 +189,7 @@ left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 8, minpeakheight = 24,
 left_intervals = left_sd[left_peaks,c(1:2)]
 
 for (i in 1:8) {
-  left_events[i+8,] = c(left_list2[left_intervals[i,1]:left_intervals[i,2]],"L")
+  left_events[i+8,] = c(left_list2[left_intervals[i,1]:left_intervals[i,2]]-median(left_list2),"L")
 }
 
 ggplot() +
@@ -207,7 +208,7 @@ left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 10, minpeakheight = 14,
 left_intervals = left_sd[left_peaks,c(1:2)]
 
 for (i in 1:10) {
-  left_events[i+16,] = c(left_list3[left_intervals[i,1]:left_intervals[i,2]],"L")
+  left_events[i+16,] = c(left_list3[left_intervals[i,1]:left_intervals[i,2]]-median(left_list3),"L")
 }
 
 ggplot() +
@@ -230,9 +231,6 @@ right_list2 <- unname(unlist(right_list2))
 right3 = read.csv("All_Right_Alen.txt", header = FALSE, sep = ",")
 right_list3 <- split(right3, seq(nrow(right3)))
 right_list3 <- unname(unlist(right_list3))
-
-ggplot() +
-  geom_line(aes(y = right_list3, x = c(1:length(right_list3))))
 ```
 
 ```{r rightevents}
@@ -250,7 +248,7 @@ right_intervals = right_sd[right_peaks,c(1:2)]
 right_intervals[1,] = right_intervals[1,]-2000
 
 for (i in 1:10) {
-  right_events[i,] = c(right_list1[right_intervals[i,1]:right_intervals[i,2]], "R")
+  right_events[i,] = c(right_list1[right_intervals[i,1]:right_intervals[i,2]]-median(right_list1), "R")
 }
 
 ggplot() +
@@ -270,7 +268,7 @@ right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 8,
 right_intervals = right_sd[right_peaks,c(1:2)]
 
 for (i in 1:8) {
-  right_events[i+10,] = c(right_list2[right_intervals[i,1]:right_intervals[i,2]], "R")
+  right_events[i+10,] = c(right_list2[right_intervals[i,1]:right_intervals[i,2]]-median(right_list2), "R")
 }
 
 ggplot() +
@@ -290,7 +288,7 @@ right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 11,
 right_intervals = right_sd[right_peaks,c(1:2)]
 
 for (i in 1:11) {
-  right_events[i+18,] = c(right_list3[right_intervals[i,1]:right_intervals[i,2]], "R")
+  right_events[i+18,] = c(right_list3[right_intervals[i,1]:right_intervals[i,2]]-median(right_list3), "R")
 }
 
 ggplot() +
@@ -315,7 +313,7 @@ up_list3 <- split(up3, seq(nrow(up3)))
 up_list3 <- unname(unlist(up_list3))
 
 ggplot() +
-  geom_line(aes(y = up_list3, x = c(1:length(up_list3))))
+  geom_line(aes(y = up_list3-median(up_list3), x = c(1:length(up_list3))))
 ```
 
 ```{r upevents}
