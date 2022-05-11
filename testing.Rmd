@@ -57,15 +57,12 @@ Classifer <- function(wave_file,
   wave_seq = wave_file
   testStat_zero = 0
   testStat_amp = 0
-  count = 0
-  prediction = c()
   Linterval = c()
   Uinterval = c()
   Zeros = c()
   Amplitude = c()
   lower_interval = 1
   max_time = length(wave_seq)
-  sds = c()
   
   #streaming Code
   while(max_time > lower_interval + window_size_test)
@@ -83,11 +80,11 @@ Classifer <- function(wave_file,
     Zeros = append(Zeros,testStat_zero)
     Amplitude = append(Amplitude,testStat_amp)
     
-    if (testStat_zero <= 100) {
+    if (testStat_zero <= 40 & testStat_amp >= 15 ) {
       upper_return = lower_interval + window_size_return
       Linterval = append(Linterval,lower_interval)
       Uinterval = append(Uinterval,upper_return)
-      lower_interval = lower_interval+ upper_return
+      lower_interval = lower_interval+ window_size_return
     }
     else {
       lower_interval = lower_interval + increment
@@ -141,28 +138,23 @@ Classifer <- function(wave_file,
 ```
 
 ```{r}
-max(Classifer(left_list2-median(left_list2))$Zero)
-min(Classifer(up_list1-median(up_list1))$sd)
-
-test = left_list2-median(left_list2)
+test = up_list3-median(up_list3)
 Classifer(test)
 ```
 
 
 ```{r}
-Classifer(left_list2-median(left_list2))
-down_intervals = Classifer(left_list2-median(left_list2))
+test = down_list3-median(down_list3)
+down_intervals = Classifer(test)
 
 ggplot() +
-  geom_line(aes(y = left_list2-median(left_list2), x = c(1:length(left_list2)))) +
+  geom_line(aes(y = test, x = c(1:length(test)))) +
   geom_rect(aes(xmin=down_intervals$Lower_interval, 
                 xmax=down_intervals$Upper_interval, ymin=-Inf, 
                 ymax=Inf), 
             fill = "green", alpha = 0.2)
-          
 
-test = left_list2-median(left_list2)
-Classifer(test)
+pt(3.25, 8, lower.tail = F)
 ```
 
 
