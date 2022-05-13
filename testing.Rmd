@@ -153,8 +153,6 @@ ggplot() +
                 xmax=down_intervals$Upper_interval, ymin=-Inf, 
                 ymax=Inf), 
             fill = "green", alpha = 0.2)
-
-pt(3.25, 8, lower.tail = F)
 ```
 
 
