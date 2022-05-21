@@ -44,38 +44,52 @@ library(tidyverse)
 #   geom_line(aes(y = All_list, x = c(1:length(All_list))))
 ```
 
-```{r classifier}
+
+```{r}
 Classifer <- function(wave_file, 
-                      window_size = 15000, 
-                      increment = 100) {
+                      window_size_test = 2000, 
+                      window_size_return = 15000,
+                      increment = 100, 
+                      threshold = 80) {
   
   wave_seq = wave_file
-
+  testStat_zero = 0
+  testStat_amp = 0
   Linterval = c()
   Uinterval = c()
+  Zeros = c()
+  Amplitude = c()
   lower_interval = 1
-
   max_time = length(wave_seq)
-
-  sds = c()
   
   #streaming Code
-  while(max_time > lower_interval + window_size)
+  while(max_time > lower_interval + window_size_test)
   {
-    upper_interval = lower_interval + window_size
+    upper_interval = lower_interval + window_size_test
     interval = wave_seq[lower_interval:upper_interval]
-   
-    # midpoint = (lower_interval + upper_interval)/2
-    # 
-    # testStat_Amplitude <- max(interval) - min(interval)
-    # 
-    # testStat <- sum(interval[1:(length(interval) - 1)] *
-    #                 interval[2:(length(interval))] <= 0) 
-  
-    sds = append(sds,sd(interval))
-    Linterval = append(Linterval,lower_interval)
-    Uinterval = append(Uinterval,upper_interval)
+
+    testStat_zero <- sum(interval[1:(length(interval) - 1)] *
+                     interval[2:(length(interval))] <= 0) 
     
+    testStat_amp <- max(interval) - min(interval)
+    
+    # Linterval = append(Linterval,lower_interval)
+    # Uinterval = append(Uinterval,upper_interval)
+    Zeros = append(Zeros,testStat_zero)
+    Amplitude = append(Amplitude,testStat_amp)
+    
+    if (testStat_amp >= 45 ) {
+      upper_return = lower_interval + window_size_return
+      Linterval = append(Linterval,lower_interval)
+      Uinterval = append(Uinterval,upper_return)
+      lower_interval = lower_interval+ window_size_return + 2000
+    }
+    else {
+      lower_interval = lower_interval + increment
+    }
+    
+ #   lower_interval = lower_interval + increment
+
     #Detecting events
     # prediction = append(prediction, statSignal)  
     # 
@@ -85,7 +99,7 @@ Classifer <- function(wave_file,
     # }  else {
     #   testStat2 = 1
     # }
-    lower_interval = lower_interval + increment
+    
  
        
   #   if (testStat2 == 2) {
@@ -114,10 +128,87 @@ Classifer <- function(wave_file,
   # Return dataframe of predictions and their intervals 
   }
   return(data.frame(Lower_interval = Linterval,
-                    Upper_interval = Uinterval, 
-                    sd = sds
+                    Upper_interval = Uinterval
+                    # Zero = Zeros,
+                    # Amp = Amplitude
                    ))
 }
+```
+
+```{r classifier}
+# Classifer <- function(wave_file,
+#                       window_size = 15000,
+#                       increment = 100) {
+# 
+#   wave_seq = wave_file
+# 
+#   Linterval = c()
+#   Uinterval = c()
+#   lower_interval = 1
+# 
+#   max_time = length(wave_seq)
+# 
+#   sds = c()
+# 
+#   #streaming Code
+#   while(max_time > lower_interval + window_size)
+#   {
+#     upper_interval = lower_interval + window_size
+#     interval = wave_seq[lower_interval:upper_interval]
+# 
+#     # midpoint = (lower_interval + upper_interval)/2
+#     #
+#     # testStat_Amplitude <- max(interval) - min(interval)
+#     #
+#     # testStat <- sum(interval[1:(length(interval) - 1)] *
+#     #                 interval[2:(length(interval))] <= 0)
+# 
+#     sds = append(sds,sd(interval))
+#     Linterval = append(Linterval,lower_interval)
+#     Uinterval = append(Uinterval,upper_interval)
+# 
+#     #Detecting events
+#     # prediction = append(prediction, statSignal)
+#     #
+#     # if (testStat < 200) {
+#     #   testStat2 = 2
+#     #   count = count + 1
+#     # }  else {
+#     #   testStat2 = 1
+#     # }
+#     lower_interval = lower_interval + increment
+# 
+# 
+#   #   if (testStat2 == 2) {
+#   #     if (testStat_Amplitude > 90) {
+#   #       maxval = which.max(interval)
+#   #       minval = which.min(interval)
+#   #       prediction = append(prediction,
+#   #                                 ifelse(maxval < minval,
+#   #                                        "L", "R"))
+#   #
+#   #       Linterval = append(Linterval,lower_interval) #recording value of lower interval
+#   #       Uinterval = append(Uinterval,upper_interval) #recording value of upper interval
+#   #       lower_interval = upper_interval + window_size*0.5
+#   #     }
+#   #     else if (testStat_Amplitude < 90 & testStat_Amplitude >30) {
+#   #         prediction = append(prediction, "up/down")
+#   #         Linterval = append(Linterval,lower_interval)
+#   #         Uinterval = append(Uinterval,upper_interval)
+#   #         lower_interval = upper_interval + window_size*0.5
+#   #     }
+#   #   else {
+#   #       lower_interval = lower_interval + increment
+#   #     }
+#   # }
+# 
+#   # Return dataframe of predictions and their intervals
+#   }
+#   return(data.frame(Lower_interval = Linterval,
+#                     Upper_interval = Uinterval,
+#                     sd = sds
+#                    ))
+# }
 ```
 
 ```{r leftdata}
@@ -132,67 +223,149 @@ left_list2 <- unname(unlist(left_list2))
 left3 = read.csv("All_Left_Alen.txt", header = FALSE, sep = ",")
 left_list3 <- split(left3, seq(nrow(left3)))
 left_list3 <- unname(unlist(left_list3))
+
+left4 = read.csv("leftNEW.txt", header = FALSE, sep = ",")
+left_list4 <- split(left4, seq(nrow(left4)))
+left_list4 <- unname(unlist(left_list4))
+
+left5 = read.csv("leftNEW2.txt", header = FALSE, sep = ",")
+left_list5 <- split(left5, seq(nrow(left5)))
+left_list5 <- unname(unlist(left_list5))
+
+left6 = read.csv("leftNEW3.txt", header = FALSE, sep = ",")
+left_list6 <- split(left6, seq(nrow(left6)))
+left_list6 <- unname(unlist(left_list6))
 ```
 
 ```{r leftevents}
-left_events = data.frame(matrix(nrow = 26, ncol = 15002))
+left_events = data.frame(matrix(nrow = 52, ncol = 15002))
 colnames(left_events) = c(1:15001, "Event")
 ```
 
 ```{r left1}
-left_sd = Classifer(left_list1, window_size = 15000)
+left_sd = Classifer(left_list1)
 
-left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 8, minpeakheight = 20, ndown = 30, 
-                               minpeakdistance = 150)[,2]
-left_intervals = left_sd[left_peaks,c(1:2)]
+# left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 8, minpeakheight = 20, ndown = 30, 
+#                                minpeakdistance = 150)[,2]
+# left_intervals = left_sd[left_peaks,c(1:2)]
+
+left_intervals = left_sd
 
 for (i in 1:8) {
-  left_events[i,] = c(left_list1[left_intervals[i,1]:left_intervals[i,2]]-median(left_list1),"L")
+  left_events[i,] = c(left_list1[left_intervals[i+1,1]:left_intervals[i+1,2]]- median(left_list1),"L")
 }
+
 
 ggplot() +
   geom_line(aes(y = left_list1, x = c(1:length(left_list1)))) +
-  geom_rect(aes(xmin=left_intervals$Lower_interval, 
-                xmax=left_intervals$Upper_interval, ymin=-Inf, 
-                ymax=Inf), 
+  geom_rect(aes(xmin=left_intervals$Lower_interval,
+                xmax=left_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
             fill = "green", alpha = 0.2)
 ```
 
 ```{r left2}
-left_sd = Classifer(left_list2, window_size = 15000)
+left_sd = Classifer(left_list2)
 
-left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 8, minpeakheight = 24, 
-                               ndown = 10, minpeakdistance = 150)[,2]
-left_intervals = left_sd[left_peaks,c(1:2)]
+# left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 8, minpeakheight = 24, 
+#                                ndown = 10, minpeakdistance = 150)[,2]
+# left_intervals = left_sd[left_peaks,c(1:2)]
+
+left_intervals = left_sd
 
 for (i in 1:8) {
-  left_events[i+8,] = c(left_list2[left_intervals[i,1]:left_intervals[i,2]]-median(left_list2),"L")
+  left_events[i+8,] = c(left_list2[left_intervals[i,1]:left_intervals[i,2]]- median(left_list2),"L")
 }
 
 ggplot() +
   geom_line(aes(y = left_list2, x = c(1:length(left_list2)))) +
-  geom_rect(aes(xmin=left_intervals$Lower_interval, 
-                xmax=left_intervals$Upper_interval, ymin=-Inf, 
-                ymax=Inf), 
+  geom_rect(aes(xmin=left_intervals$Lower_interval,
+                xmax=left_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
             fill = "green", alpha = 0.2)
 ```
 
 ```{r left3}
-left_sd = Classifer(left_list3, window_size = 15000)
+left_sd = Classifer(left_list3)
 
-left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 10, minpeakheight = 14, 
-                               ndown = 30, minpeakdistance = 150)[,2]
-left_intervals = left_sd[left_peaks,c(1:2)]
+# left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 10, minpeakheight = 14, 
+#                                ndown = 30, minpeakdistance = 150)[,2]
+# left_intervals = left_sd[left_peaks,c(1:2)]
+
+left_intervals = left_sd
 
 for (i in 1:10) {
-  left_events[i+16,] = c(left_list3[left_intervals[i,1]:left_intervals[i,2]]-median(left_list3),"L")
+  left_events[i+16,] = c(left_list3[left_intervals[i+1,1]:left_intervals[i+1,2]]- median(left_list3),"L")
 }
 
 ggplot() +
   geom_line(aes(y = left_list3, x = c(1:length(left_list3)))) +
-  geom_rect(aes(xmin=left_intervals$Lower_interval, 
-                xmax=left_intervals$Upper_interval, ymin=-Inf, 
-                ymax=Inf), 
+  geom_rect(aes(xmin=left_intervals$Lower_interval,
+                xmax=left_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
+```
+
+```{r left4}
+left_sd = Classifer(left_list4)
+
+# left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 10, minpeakheight = 14, 
+#                                ndown = 40, minpeakdistance = 150)[,2]
+# left_intervals = left_sd[left_peaks,c(1:2)]
+
+left_intervals = left_sd
+
+for (i in 1:8) {
+  left_events[i+26,] = c(left_list4[left_intervals[i,1]:left_intervals[i,2]]- median(left_list4),"L")
+}
+
+ggplot() +
+  geom_line(aes(y = left_list4, x = c(1:length(left_list4)))) +
+  geom_rect(aes(xmin=left_intervals$Lower_interval,
+                xmax=left_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
+```
+
+```{r left5}
+left_sd = Classifer(left_list5)
+
+# left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 10, minpeakheight = 14, 
+#                                ndown = 50, minpeakdistance = 150)[,2]
+# left_intervals = left_sd[left_peaks,c(1:2)]
+
+left_intervals = left_sd
+
+for (i in 1:10) {
+  left_events[i+34,] = c(left_list5[left_intervals[i+1,1]:left_intervals[i+1,2]]- median(left_list5),"L")
+}
+
+ggplot() +
+  geom_line(aes(y = left_list5, x = c(1:length(left_list5)))) +
+  geom_rect(aes(xmin=left_intervals$Lower_interval,
+                xmax=left_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
+```
+
+```{r left6}
+left_sd = Classifer(left_list6)
+
+# left_peaks = pracma::findpeaks(left_sd$sd, npeaks = 10, minpeakheight = 14, 
+#                                ndown = 60, minpeakdistance = 160)[,2]
+# left_intervals = left_sd[left_peaks,c(1:2)]
+
+left_intervals = left_sd
+
+for (i in 1:8) {
+  left_events[i+44,] = c(left_list6[left_intervals[i+1,1]:left_intervals[i+1,2]]- median(left_list6),"L")
+}
+
+ggplot() +
+  geom_line(aes(y = left_list6, x = c(1:length(left_list6)))) +
+  geom_rect(aes(xmin=left_intervals$Lower_interval,
+                xmax=left_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
             fill = "green", alpha = 0.2)
 ```
 
@@ -209,73 +382,158 @@ right_list2 <- right_list2[40000:length(right_list2)]
 right3 = read.csv("All_Right_Alen.txt", header = FALSE, sep = ",")
 right_list3 <- split(right3, seq(nrow(right3)))
 right_list3 <- unname(unlist(right_list3))
+
+right4 = read.csv("Right_195.txt", header = FALSE, sep = ",")
+right_list4 <- split(right4, seq(nrow(right4)))
+right_list4 <- unname(unlist(right_list4))
+
+right5 = read.csv("rightNEW.txt", header = FALSE, sep = ",")
+right_list5 <- split(right5, seq(nrow(right5)))
+right_list5 <- unname(unlist(right_list5))
+
+right6 = read.csv("rightNEW2.txt", header = FALSE, sep = ",")
+right_list6 <- split(right6, seq(nrow(right6)))
+right_list6 <- unname(unlist(right_list6))
 ```
 
 ```{r rightevents}
-right_events = data.frame(matrix(nrow = 28, ncol = 15002))
+right_events = data.frame(matrix(nrow = 53, ncol = 15002))
 colnames(right_events) = c(1:15001, "Event")
 ```
 
 ```{r right1}
 right_sd = Classifer(right_list1)
 
-right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 10, 
-                                minpeakheight = 27, ndowns = 25)[,2]
-right_intervals = right_sd[right_peaks,c(1:2)]
+# right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 10,
+#                                 minpeakheight = 27, ndowns = 25)[,2]
+# right_intervals = right_sd[right_peaks,c(1:2)]
+# 
+# right_intervals[1,] = right_intervals[1,]-2000
 
-right_intervals[1,] = right_intervals[1,]-2000
+right_intervals = right_sd
 
 for (i in 1:10) {
-  right_events[i,] = c(right_list1[right_intervals[i,1]:right_intervals[i,2]]-median(right_list1), "R")
+  right_events[i,] = c(right_list1[right_intervals[i,1]:right_intervals[i,2]]- median(right_list1), "R")
 }
 
-# ggplot() +
-#   geom_line(aes(y = right_list1, x = c(1:length(right_list1)))) +
-#   geom_rect(aes(xmin=right_intervals$Lower_interval, 
-#                 xmax=right_intervals$Upper_interval, ymin=-Inf, 
-#                 ymax=Inf), 
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = right_list1, x = c(1:length(right_list1)))) +
+  geom_rect(aes(xmin=right_intervals$Lower_interval,
+                xmax=right_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 ```{r right2}
 right_sd = Classifer(right_list2)
 
-right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 7, 
-                                minpeakheight = 30, 
-                                minpeakdistance = 150)[,2]
-right_intervals = right_sd[right_peaks,c(1:2)]
+# right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 7, 
+#                                 minpeakheight = 30, 
+#                                 minpeakdistance = 150)[,2]
+# right_intervals = right_sd[right_peaks,c(1:2)]
+
+right_intervals = right_sd
 
 for (i in 1:7) {
-  right_events[i+10,] = c(right_list2[right_intervals[i,1]:right_intervals[i,2]]-median(right_list2), "R")
+  right_events[i+10,] = c(right_list2[right_intervals[i,1]:right_intervals[i,2]]- median(right_list2), "R")
 }
 
-# ggplot() +
-#   geom_line(aes(y = right_list2, x = c(1:length(right_list2)))) +
-#   geom_rect(aes(xmin=right_intervals$Lower_interval,
-#                 xmax=right_intervals$Upper_interval, ymin=-Inf,
-#                 ymax=Inf),
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = right_list2, x = c(1:length(right_list2)))) +
+  geom_rect(aes(xmin=right_intervals$Lower_interval,
+                xmax=right_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 ```{r right3}
 right_sd = Classifer(right_list3)
 
-right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 11, 
-                                minpeakheight = 15, 
-                                minpeakdistance = 150)[,2]
-right_intervals = right_sd[right_peaks,c(1:2)]
+# right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 11, 
+#                                 minpeakheight = 15, 
+#                                 minpeakdistance = 150)[,2]
+# right_intervals = right_sd[right_peaks,c(1:2)]
+
+right_intervals = right_sd
 
 for (i in 1:11) {
-  right_events[i+17,] = c(right_list3[right_intervals[i,1]:right_intervals[i,2]]-median(right_list3), "R")
+  right_events[i+17,] = c(right_list3[right_intervals[i+1,1]:right_intervals[i+1,2]]- median(right_list3), "R")
 }
 
-# ggplot() +
-#   geom_line(aes(y = right_list3, x = c(1:length(right_list3)))) +
-#   geom_rect(aes(xmin=right_intervals$Lower_interval,
-#                 xmax=right_intervals$Upper_interval, ymin=-Inf,
-#                 ymax=Inf),
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = right_list3, x = c(1:length(right_list3)))) +
+  geom_rect(aes(xmin=right_intervals$Lower_interval,
+                xmax=right_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
+
+```{r right4}
+right_sd = Classifer(right_list4)
+
+# right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 11, 
+#                                 minpeakheight = 15, 
+#                                 minpeakdistance = 150)[,2]
+# right_intervals = right_sd[right_peaks,c(1:2)]
+
+right_intervals = right_sd
+
+for (i in 1:9) {
+  right_events[i+28,] = c(right_list4[right_intervals[i,1]:right_intervals[i,2]]- median(right_list4), "R")
+}
+
+ggplot() +
+  geom_line(aes(y = right_list4, x = c(1:length(right_list4)))) +
+  geom_rect(aes(xmin=right_intervals$Lower_interval,
+                xmax=right_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
+```
+
+```{r right5}
+right_sd = Classifer(right_list5)
+
+# right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 11, 
+#                                 minpeakheight = 15, 
+#                                 minpeakdistance = 150)[,2]
+# right_intervals = right_sd[right_peaks,c(1:2)]
+
+right_intervals = right_sd
+
+for (i in 1:7) {
+  right_events[i+37,] = c(right_list5[right_intervals[i,1]:right_intervals[i,2]]- median(right_list5), "R")
+}
+
+ggplot() +
+  geom_line(aes(y = right_list5, x = c(1:length(right_list5)))) +
+  geom_rect(aes(xmin=right_intervals$Lower_interval,
+                xmax=right_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
+```
+
+```{r right6}
+right_sd = Classifer(right_list6)
+
+# right_peaks = pracma::findpeaks(right_sd$sd, npeaks = 11, 
+#                                 minpeakheight = 15, 
+#                                 minpeakdistance = 150)[,2]
+# right_intervals = right_sd[right_peaks,c(1:2)]
+
+right_intervals = right_sd
+
+for (i in 1:9) {
+  right_events[i+44,] = c(right_list6[right_intervals[i,1]:right_intervals[i,2]]- median(right_list6), "R")
+}
+
+ggplot() +
+  geom_line(aes(y = right_list6, x = c(1:length(right_list6)))) +
+  geom_rect(aes(xmin=right_intervals$Lower_interval,
+                xmax=right_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
+```
+
 
 ```{r updata}
 up1 = read.csv("All_Up.csv", header = FALSE, sep = ",")
@@ -304,7 +562,7 @@ up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 9, minpeakheight = 8,
 up_intervals = up_sd[up_peaks,c(1:2)]
 
 for (i in 1:9) {
-  up_events[i,] = c(up_list1[up_intervals[i,1]:up_intervals[i,2]],"U")
+  up_events[i,] = c(up_list1[up_intervals[i,1]:up_intervals[i,2]]- median(up_list1),"U")
 }
 
 # ggplot() +
@@ -323,7 +581,7 @@ up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 9, minpeakheight = 5,
 up_intervals = up_sd[up_peaks,c(1:2)]
 
 for (i in 1:9) {
-  up_events[i+9,] = c(up_list2[up_intervals[i,1]:up_intervals[i,2]],"U")
+  up_events[i+9,] = c(up_list2[up_intervals[i,1]:up_intervals[i,2]]- median(up_list2),"U")
 }
 
 # ggplot() +
@@ -342,7 +600,7 @@ up_peaks = pracma::findpeaks(up_sd$sd, npeaks = 11, minpeakheight = 5,
 up_intervals = up_sd[up_peaks,c(1:2)]
 
 for (i in 1:11) {
-  up_events[i+18,] = c(up_list3[up_intervals[i,1]:up_intervals[i,2]],"U")
+  up_events[i+18,] = c(up_list3[up_intervals[i,1]:up_intervals[i,2]]- median(up_list3),"U")
 }
 
 # ggplot() +
@@ -380,7 +638,7 @@ down_peaks = pracma::findpeaks(down_sd$sd, npeaks = 9, minpeakheight = 13,
 down_intervals = down_sd[down_peaks,c(1:2)]
 
 for (i in 1:9) {
-  down_events[i,] = c(down_list1[down_intervals[i,1]:down_intervals[i,2]],"D")
+  down_events[i,] = c(down_list1[down_intervals[i,1]:down_intervals[i,2]]- median(down_list1),"D")
 }
 
 # ggplot() +
@@ -398,7 +656,7 @@ down_peaks = pracma::findpeaks(down_sd$sd, npeaks = 12, minpeakheight = 3.58 , n
 down_intervals = down_sd[down_peaks,c(1:2)]
 
 for (i in 1:12) {
-  down_events[i+9,] = c(down_list2[down_intervals[i,1]:down_intervals[i,2]],"D")
+  down_events[i+9,] = c(down_list2[down_intervals[i,1]:down_intervals[i,2]]- median(down_list2),"D")
 }
 
 # ggplot() +
@@ -417,7 +675,7 @@ down_peaks = pracma::findpeaks(down_sd$sd, npeaks = 11, minpeakheight = 10,
 down_intervals = down_sd[down_peaks,c(1:2)]
 
 for (i in 1:11) {
-  down_events[i+21,] = c(down_list3[down_intervals[i,1]:down_intervals[i,2]],"D")
+  down_events[i+21,] = c(down_list3[down_intervals[i,1]:down_intervals[i,2]]- median(down_list3),"D")
 }
 
 # ggplot() +
@@ -433,17 +691,25 @@ blink1 = read.csv("All_Blink.txt", header = FALSE, sep = ",")
 blink_list1 <- split(blink1, seq(nrow(blink1)))
 blink_list1 <- unname(unlist(blink_list1))
 
-# blink2 = read.csv("All_Blink.csv", header = FALSE, sep = ",")
-# blink_list2 <- split(blink2, seq(nrow(blink2)))
-# blink_list2 <- unname(unlist(blink_list2))
+blink2 = read.csv("All_Blink_new_1.txt", header = FALSE, sep = ",")
+blink_list2 <- split(blink2, seq(nrow(blink2)))
+blink_list2 <- unname(unlist(blink_list2))
 
-blink3 = read.csv("All_Blink_Alen.txt", header = FALSE, sep = ",")
+blink3 = read.csv("All_Blink_new_2.txt", header = FALSE, sep = ",")
 blink_list3 <- split(blink3, seq(nrow(blink3)))
 blink_list3 <- unname(unlist(blink_list3))
+
+blink4 = read.csv("All_Blink_new_3.txt", header = FALSE, sep = ",")
+blink_list4 <- split(blink4, seq(nrow(blink4)))
+blink_list4 <- unname(unlist(blink_list4))
+
+blink5 = read.csv("Blink_195.txt", header = FALSE, sep = ",")
+blink_list5 <- split(blink5, seq(nrow(blink5)))
+blink_list5 <- unname(unlist(blink_list5))
 ```
 
 ```{r blinkevents}
-blink_events = data.frame(matrix(nrow = 23, ncol = 15002))
+blink_events = data.frame(matrix(nrow = 10, ncol = 15002))
 colnames(blink_events) = c(1:15001, "Event")
 ```
 
@@ -457,15 +723,15 @@ blink_intervals = blink_sd[blink_peaks,c(1:2)]
 blink_intervals[1,] = blink_intervals[1,]-2000
 
 for (i in 1:10) {
-  blink_events[i,] = c(blink_list1[blink_intervals[i,1]:blink_intervals[i,2]]-median(blink_list1), "B")
+  blink_events[i,] = c(blink_list1[blink_intervals[i,1]:blink_intervals[i,2]]- median(blink_list1), "B")
 }
 
-# ggplot() +
-#   geom_line(aes(y = blink_list1, x = c(1:length(blink_list1)))) +
-#   geom_rect(aes(xmin=blink_intervals$Lower_interval, 
-#                 xmax=blink_intervals$Upper_interval, ymin=-Inf, 
-#                 ymax=Inf), 
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = blink_list1, x = c(1:length(blink_list1)))) +
+  geom_rect(aes(xmin=blink_intervals$Lower_interval,
+                xmax=blink_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 
@@ -477,16 +743,16 @@ blink_peaks = pracma::findpeaks(blink_sd$sd, npeaks = 13,
                                 minpeakdistance = 150)[,2]
 blink_intervals = blink_sd[blink_peaks,c(1:2)]
 
-for (i in 1:13) {
-  blink_events[i+10,] = c(blink_list3[blink_intervals[i,1]:blink_intervals[i,2]]-median(blink_list3), "B")
+for (i in 1:10) {
+  blink_events[i+10,] = c(blink_list3[blink_intervals[i,1]:blink_intervals[i,2]]- median(blink_list3), "B")
 }
 
-# ggplot() +
-#   geom_line(aes(y = blink_list3, x = c(1:length(blink_list3)))) +
-#   geom_rect(aes(xmin=blink_intervals$Lower_interval, 
-#                 xmax=blink_intervals$Upper_interval, ymin=-Inf, 
-#                 ymax=Inf), 
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = blink_list3, x = c(1:length(blink_list3)))) +
+  geom_rect(aes(xmin=blink_intervals$Lower_interval,
+                xmax=blink_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 ```{r Randomdata}
@@ -544,15 +810,15 @@ random_peaks = pracma::findpeaks(random_sd$sd, minpeakheight = 10,
 random_intervals = random_sd[random_peaks,c(1:2)]
 
 for (i in 1:13) {
-  random_events[i,] = c(random_list1[random_intervals[i,1]:random_intervals[i,2]],"N")
+  random_events[i,] = c(random_list1[random_intervals[i,1]:random_intervals[i,2]]- median(random_list1),"N")
 }
 
-# ggplot() +
-#   geom_line(aes(y = random_list1, x = c(1:length(random_list1)))) +
-#   geom_rect(aes(xmin=random_intervals$Lower_interval, 
-#                 xmax=random_intervals$Upper_interval, ymin=-Inf, 
-#                 ymax=Inf), 
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = random_list1, x = c(1:length(random_list1)))) +
+  geom_rect(aes(xmin=random_intervals$Lower_interval,
+                xmax=random_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 
@@ -564,15 +830,15 @@ random_peaks = pracma::findpeaks(random_sd$sd, npeaks = 10,
 random_intervals = random_sd[random_peaks,c(1:2)]
 
 for (i in 1:10) {
-  random_events[i+13,] = c(random_list2[random_intervals[i,1]:random_intervals[i,2]],"N")
+  random_events[i+13,] = c(random_list2[random_intervals[i,1]:random_intervals[i,2]]- median(random_list2),"N")
 }
 
-# ggplot() +
-#   geom_line(aes(y = random_list2, x = c(1:length(random_list2)))) +
-#   geom_rect(aes(xmin=random_intervals$Lower_interval, 
-#                 xmax=random_intervals$Upper_interval, ymin=-Inf, 
-#                 ymax=Inf), 
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = random_list2, x = c(1:length(random_list2)))) +
+  geom_rect(aes(xmin=random_intervals$Lower_interval,
+                xmax=random_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 ```{r random4}
@@ -583,15 +849,15 @@ random_peaks = pracma::findpeaks(random_sd$sd, npeaks = 9,
 random_intervals = random_sd[random_peaks,c(1:2)]
 
 for (i in 1:9) {
-  random_events[i+23,] = c(random_list4[random_intervals[i,1]:random_intervals[i,2]],"N")
+  random_events[i+23,] = c(random_list4[random_intervals[i,1]:random_intervals[i,2]]- median(random_list4),"N")
 }
 
-# ggplot() +
-#   geom_line(aes(y = random_list4, x = c(1:length(random_list4)))) +
-#   geom_rect(aes(xmin=random_intervals$Lower_interval, 
-#                 xmax=random_intervals$Upper_interval, ymin=-Inf, 
-#                 ymax=Inf), 
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = random_list4, x = c(1:length(random_list4)))) +
+  geom_rect(aes(xmin=random_intervals$Lower_interval,
+                xmax=random_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 ```{r random5}
@@ -602,15 +868,15 @@ random_peaks = pracma::findpeaks(random_sd$sd, npeaks = 10,
 random_intervals = random_sd[random_peaks,c(1:2)]
 
 for (i in 1:10) {
-  random_events[i+32,] = c(random_list5[random_intervals[i,1]:random_intervals[i,2]],"N")
+  random_events[i+32,] = c(random_list5[random_intervals[i,1]:random_intervals[i,2]]- median(random_list5),"N")
 }
-
-# ggplot() +
-#   geom_line(aes(y = random_list5, x = c(1:length(random_list5)))) +
-#   geom_rect(aes(xmin=random_intervals$Lower_interval, 
-#                 xmax=random_intervals$Upper_interval, ymin=-Inf, 
-#                 ymax=Inf), 
-#             fill = "green", alpha = 0.2)
+ 
+ggplot() +
+  geom_line(aes(y = random_list5, x = c(1:length(random_list5)))) +
+  geom_rect(aes(xmin=random_intervals$Lower_interval,
+                xmax=random_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 ```{r random6}
@@ -621,28 +887,26 @@ random_peaks = pracma::findpeaks(random_sd$sd, npeaks = 10,
 random_intervals = random_sd[random_peaks,c(1:2)]
 
 for (i in 1:10) {
-  random_events[i+42,] = c(random_list6[random_intervals[i,1]:random_intervals[i,2]],"N")
+  random_events[i+42,] = c(random_list6[random_intervals[i,1]:random_intervals[i,2]]- median(random_list6),"N")
 }
 
-# ggplot() +
-#   geom_line(aes(y = random_list6, x = c(1:length(random_list6)))) +
-#   geom_rect(aes(xmin=random_intervals$Lower_interval, 
-#                 xmax=random_intervals$Upper_interval, ymin=-Inf, 
-#                 ymax=Inf), 
-#             fill = "green", alpha = 0.2)
+ggplot() +
+  geom_line(aes(y = random_list6, x = c(1:length(random_list6)))) +
+  geom_rect(aes(xmin=random_intervals$Lower_interval,
+                xmax=random_intervals$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 ```{r events}
-
 random_events$Event = random_list_events
+left_events1 = left_events
+left_events1 = left_events1[c(1:43,45:52),]
+test = rbind(left_events1, right_events)
 
-test = rbind(left_events, right_events, up_events, down_events)
-    
-write.csv(test, "Events.csv", row.names = F)
+test = filter(test, test$Event == "L" | test$Event == "R" | test$Event == "B")
+
+write.csv(test, "Events_final.csv", row.names = F)
+
+left_events[44,] %>% as.list()
 ```
-
-
-
-
-
-

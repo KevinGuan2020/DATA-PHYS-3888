@@ -34,6 +34,10 @@ left3 = read.csv("All_Left_Alen.txt", header = FALSE, sep = ",")
 left_list3 <- split(left3, seq(nrow(left3)))
 left_list3 <- unname(unlist(left_list3))
 
+left_4 = read.csv("Left_195.txt", header = FALSE, sep = ",")
+left_list4 <- split(left_4, seq(nrow(left_4)))
+left_list4 <- unname(unlist(left_list4))
+
 down1 = read.csv("All_down.csv", header = FALSE, sep = ",")
 down_list1 <- split(down1, seq(nrow(down1)))
 down_list1 <- unname(unlist(down_list1))
@@ -45,6 +49,10 @@ down_list2 <- unname(unlist(down_list2))
 down3 = read.csv("All_down_Alen.txt", header = FALSE, sep = ",")
 down_list3 <- split(down3, seq(nrow(down3)))
 down_list3 <- unname(unlist(down_list3))
+
+right1 = read.csv("Right_195.txt", header = FALSE, sep = ",")
+right_list1 <- split(right1, seq(nrow(right1)))
+right_list1 <- unname(unlist(right_list1))
 ```
 
 ```{r classifier}
@@ -80,11 +88,11 @@ Classifer <- function(wave_file,
     Zeros = append(Zeros,testStat_zero)
     Amplitude = append(Amplitude,testStat_amp)
     
-    if (testStat_zero <= 40 & testStat_amp >= 15 ) {
+    if (testStat_amp >= 45 ) {
       upper_return = lower_interval + window_size_return
       Linterval = append(Linterval,lower_interval)
       Uinterval = append(Uinterval,upper_return)
-      lower_interval = lower_interval+ window_size_return
+      lower_interval = lower_interval+ window_size_return +2000
     }
     else {
       lower_interval = lower_interval + increment
@@ -138,8 +146,18 @@ Classifer <- function(wave_file,
 ```
 
 ```{r}
-test = up_list3-median(up_list3)
-Classifer(test)
+library(tidyverse)
+
+set = right_list1
+
+events = Classifer(set)
+
+ggplot() +
+  geom_line(aes(y = set, x = c(1:length(set)))) +
+  geom_rect(aes(xmin=events$Lower_interval,
+                xmax=events$Upper_interval, ymin=-Inf,
+                ymax=Inf),
+            fill = "green", alpha = 0.2)
 ```
 
 
