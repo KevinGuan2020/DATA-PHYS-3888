@@ -1,5 +1,5 @@
 # DATA-PHYS-3888
-Capstone project 
+University of Sydney DATA3888/PHYS3888 Capstone Brain Project. This project utilised a Spikerbox to record Electrooculography and report reaction time. The product is written in python and involves data collection, event extraction, event classification and live streaming. The final GUI was a screen with two tiles, where one will light up and the time taken to look in the right direction is returned. This is repeated 5 times and an average reaction time will be outputted. 
 
 # Packages:
 ## Python (version 3.9.7):
