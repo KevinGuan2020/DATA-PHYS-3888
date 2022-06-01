@@ -2,7 +2,7 @@
 Capstone project 
 
 # Packages:
-## Python:
+## Python (version 3.9.7):
 * CSV
 * Freegames
 * Matplotlib
@@ -17,7 +17,7 @@ Capstone project
 * Time
 * Turtle
 
-Instructions:
+# Instructions:
 * Run(Data collection code in Project report appendix code 1) to record raw data and save as a .csv file
 * Import the raw data into (Event extraction code in Project report appendix code 2) and run to extract events and save as a .csv file
 * Import the extracted event values into (Classifer code in Project report appendix code 3 SVM) and run to train an SVM machine learning model save as a .sav file
