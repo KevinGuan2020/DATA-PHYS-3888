@@ -1,5 +1,8 @@
 ---
-title: "DATA3888 Brain01 Project Report"
+title: "DATA3888/PHYS3888 Brain01 Project Report"
+subtitle: |
+  **Github** (https://github.com/KevinGuan2020/DATA-PHYS-3888)     
+  **Replit** (https://replit.com/join/kbbefmoroi-gary0505lou)
 author: "Alen Biju, Kevin Guan, Harshini Jayakumar Gary Lou, Hamish McFarlane, Pearl Pulikkottil"
 date: "University of Sydney | Semester 2 2021 | 2022-06-01"
 output:
@@ -45,49 +48,48 @@ library(tidyverse)
 # **1 Executive Summary**
 
 ## **1.1 Aim and Background**
-The aim of our project was to create an application which measured the ocular reaction time of the user. Having an accurate and precise measurement of an individual’s ocular reaction time is difficult to obtain because most methods require the movement of a different part of the body to indicate response to stimulus. Professional athletes for example need to know their reaction time if they wish to improve it and gain an advantage over their competitors. However, everyone’s reaction time is important as it can be an indicator of illness and disease. Especially when it is varied significantly based on the location of the stimulus. To solve this problem a multidisciplinary approach was required. Physicists provided knowledge on the operation and functionality of equipment, allowing clean data to be extracted from the user’s eye movements. Data scientists contributed expertise in software design and modelling, taking the extracted data and giving cause to its value.
+The aim of our project was to create an application which measured the ocular reaction time of the user. Having an accurate and precise measurement of an individual’s ocular reaction time is difficult to obtain because most methods require the movement of a different part of the body to indicate response to stimulus. Professional athletes for example need to know their reaction time if they wish to improve it and gain an advantage over their competitors. However, everyone’s reaction time is important as it can be an indicator of illness and disease. Especially when it is varied significantly based on the location of the stimulus. To solve this problem a multidisciplinary approach was required. Physicists provided knowledge on the operation and functionality of equipment for clean data extraction of user’s eye movements. Data scientists contributed expertise in software design and modelling, taking the extracted data and giving cause to its value.
 
 ## **1.2 Main Findings**
-Our final product is an application which measures simple visual reaction time. We used a brain Spikerbox to record electrooculography signals and python to process this signal to identify an eye movement. The application uses amplitude and zero crossings to identify an eye movement event and uses a SVM model to classify it. Using a display, a left or right tile is flashed as a visual stimulus and the time taken for the subject to react in the correct direction is recorded. The program repeats this for 5 iterations and then the average reaction time is returned. 
+We found that we could produce an application which measures simple visual reaction time. We used a brain Spikerbox^1^ to record electrooculography signals and python to process this signal to identify an eye movement. The application uses amplitude and zero crossings to identify an eye movement event and uses a SVM model to classify it. Using a display, a left or right tile is flashed as a visual stimulus and the time taken for the subject to react in the correct direction is recorded. Although the model was theoretically highly accurate and stable, it was found that the product was still susceptible to slight variations with the SpikerBox and the electrode placements and it is important to take them into account for better generalisability in the future.
 
 ## **1.3 Project Overview**
 
-```{r Figure 1, fig.align="left", fig.cap="**Figure 1 Project Overview.** Visualises steps taken to produce final product**"}
+```{r Figure 1, fig.align="left", fig.cap="**Figure 1 Project Overview.** Visualises steps taken to produce final product"}
 knitr::include_graphics("Project Overview.png")
 ```
 
 ## **1.4 Practical relevance of the Analysis**
 
-Our product can be applied in industries including medical research, road safety, high performance sports and cognitive rehabilitation. Researchers can utilise eye reaction time to investigate the effects of external factors such as drugs and fatigue on perception. Transport departments can utilise the product to determine whether an individual has the ability to react to road dangers to be able to obtain a licence. High performance sports such as F1, can train reaction speeds of athletes by implementing this product into routine training. Rehabilitation for various neurological conditions could utilise the product to improve treatment engagement and self-efficacy.1 
+Our product can be applied in industries including medical research, road safety, high performance sports and cognitive rehabilitation. Researchers can utilise eye reaction time to investigate the effects of external factors such as drugs and fatigue on perception. Transport departments can utilise the product to determine whether an individual has the ability to react to road dangers to be able to obtain a licence. High performance sports such as F1, can train reaction speeds of athletes by implementing this product into routine training. Rehabilitation for various neurological conditions could utilise the product to improve treatment engagement and self-efficacy^2^.
 
 # **2 Methods** 
 
 ## **2.1 Data Collection**
 
-Three electrodes were placed on the user to measure electrical signals generated by the body (the dipole created between the cornea and retina). Two were placed on the subject’s forehead above their eyebrow, and one was placed behind their ear on the mastoid. Electrode gel was applied between each electrode and the skin. Terminals were attached with alligator clips to the electrodes; the positive and negative terminals were attached on the forehead and the ground terminal was attached to the mastoid. The terminals combined into a single 3.5mm input into the SpikerBox. Via a micro-usb to usb-a cable, data output from the SpikerBox was live-streamed to a computer, where it was processed in Python using a notch filter, removing data with a frequency of 450Hz, then using a low pass filter, removing all data with frequency over 500Hz. Data samples were collected by creating an array containing the value of the dipole (voltage) throughout an event. The user was instructed verbally to create an event. Events consisted of eye movement up down left and right or blinking. Samples were taken over thirty seconds and contained about fifteen events **(see Appendix code 1).**
+Three electrodes were placed on the user to measure electrical signals generated by the body (the dipole created between the cornea and retina). Two were placed on the subject’s forehead above their eyebrow, and one was placed behind their ear on the mastoid. Electrode gel was applied between each electrode and the skin. The positive and negative terminals were attached on the forehead and the ground terminal was attached to the mastoid. Data output from the SpikerBox was live-streamed to a computer, where it was processed in Python using a notch filter, removing data with a frequency of 450hz, then using a low pass filter, removing all data with frequency over 500hz. Data samples were collected by creating an array containing the value of the dipole (voltage) throughout an event. The user was instructed verbally to create an event. Events consisted of eye movements	 up, down, left, right or blinking. Samples were taken over thirty seconds and contained about ten events **(see Appendix code 1).**
 
 ## **2.2 Developed Model**
 
 #### **Physics Perspective:**
 
-The final model for collecting data involved many aspects to record and live stream accurate data. These included aspects such as electrode placement, noise reduction and diverse input data. 
+Our developed model involved three stages; Collection, processing and recording. Electrode placement was crucial in collection as it affected the magnitude of the dipole measurement. Left and right eye events were preferred. In light of this, two electrodes were spaced out above one eye and a ground electrode was placed behind the ear on the mastoid. Electrode gel was applied to make sure there was good contact between the electrode and skin. Separate electrodes were used instead of a headband. This allowed for more control over the placement of electrodes and removed static interference from the headband. Noise reduction was used in processing. From the SciPy library two modules were used to filter the signal;  
 
-Electrode placement is crucial as it determines the strength of the dipole signal that is being recorded. Because of this, two electrodes were spaced out above one eye. Electrode gel was applied to make sure there was good contact between the electrode and skin.
+* scipy.signal.iirnotch which was implemented with the following parameters; w0 = 225/22050 & Q  = 3.  
+* scipy.signal.butter is a low pass filter with the following parameters; N = 4, Wn = 250/22050 & bytpe = ‘lowpass’
 
-Noise reduction was a major aspect of the final model. There many steps taken to reduce the overall noise that was present in the recorded data. The first step involved using separate electrodes instead of electrodes placed on a headband. This allowed for better placement of electrodes and the removal of any static interferences caused by the headband. New batteries were used during recording sessions as it allowed for the reduction of background noise. Filters were utilised to remove any further background noise and produce a cleaner recording of data. Double filtering was applied using a notch filter and a low pass filter. By manually counting the oscillations of the recorded data over three 0.1 second samples, the frequency that was decided to be filtered was 500 Hz. This implementation had drastically improved the signal quality from the EOG readings. 
-
-Recording multiple data sets from multiple participants is vital in creating an accurate classifier. Recordings from all individuals of the group provided a large variety of data sets. Each individual's left/right eye movements, no eye movement and random eye movements were recorded.   
+Mitigating unwanted frequencies by double filtering drastically improved the signal quality. Samples were recorded from multiple participants with different patterns of events providing a large variety of datasets to train the classifier.
 
 <br/>
 
 #### **Data Science Perspective:**
 
 **Extracting Events as Features:**  
-Upon inspection of the recorded training data, we found that the EOG signals varied greatly between team members. Variations included baseline values and length and peaks/troughs of eye movement events. 
+Upon inspection of the recorded training data, we found that the EOG signals varied greatly between team members. Variations included baseline values and length and peaks/troughs of eye movement events.
 
-In order to extract the 10 eye-movements from each 30-second file for building our classifier,  there needed to be a mechanism to detect events despite all the variation. Given that each file will have different heights for the spikes, values as the origin and length of event, using only one test statistic was not always accurate. Thus, the team decided to use a combination of both amplitude and zero-crossings as thresholds for an event. The length of an event was manually decided to contain a good compromise between encompassing all event lengths and removing unwanted data **(see Figure 2)**.  To implement zero-crossings, the median of each file had to be subtracted due to variations in baseline. We had to extend this to our final product, in which we added a calibration phase. 
+Given that each file had different heights and lengths for events, and varying baselines, using only one test statistic was not always accurate. Thus, the team decided to use a combination of both amplitude and zero-crossings as thresholds for an event.The length of an event was manually decided to contain a good compromise between encompassing all event lengths and removing unwanted data **(see Figure 2)**. To implement zero-crossings, the median of each file had to be subtracted due to variations in baseline. 
 
-Our final extraction code utilised a moving window of 2000 values, where the start of an event is indicated by zero crossings that's less than 10 and amplitude greater than or equal to 30. If the start of an event is detected, the code returns the window plus 13,000 values, for a total event size of 15,000 values **(see Appendix Code 2)**. 
+Our final product is extended to have a calibration phase where the extraction code utilises a moving window of 2000 values, where the start of an event is indicated by zero crossings that's less than 10 and amplitude greater than or equal to 30. If the start of an event is detected, the code returns the window plus 13,000 values, for a total event size of 15,000 values **(see Appendix Code 2)**. 
 
 ```{r Classifier}
 #Function for extracting events
@@ -164,73 +166,80 @@ ggplot() +
 ```
 
 **Feature Selection:**  
-Since events varied so much between files, hard-coding thresholds for event classification was deemed impractical and hence machine learning was chosen. The team started by first sending the whole file into the classifier for it to train on where each y-value is considered a feature. However, there were way too many attributes in each row and there was way too much noise that the accuracy was very low regardless of what machine learning algorithm was used.
+Since events varied so much between files, hard-coding thresholds for event classification was deemed impractical and hence machine learning was chosen. The team started by first sending the whole file in to train the classifier where each y-value is considered a feature. However, there were way too many attributes in each row, generating an abundance of noise which caused the accuracy to be very low regardless of what machine learning algorithm was used.
 
-The team’s next idea was to use the properties of an extracted event as the variables for the classifier to train on. This includes the max y-value, the min y-value, the index of the max y-value, the index of the min y-value and standard deviation. However, it was found this method reduced a lot of information from the wave which caused under-fitting.
+The team’s next idea was to use the properties of an extracted event as the variables for the classifier to train on. This includes the max y-value, the min y-value, their positions and standard deviation. However, this reduced a lot of information from the wave which caused under-fitting.
 
 Ultimately, the team decided to use all the values of an extracted event and use the y-values as features for the model to train on. 
+
 
 **Classifiers:**  
 Under supervised learning model, we implemented K-Nearest Neighbours (KNN), Naive Bayes, Logistic Regression, Random Forest, Support vector Machine (SVM), Multilayer Perceptron (MLP) and Gradient Boosting. 
 
-The 15,000 values for an event was inputted into the AI model to predict the eye movement direction. Using the collected data, our team trained multiple AI models and tested the accuracy through repeated cross-validation. Initially, accuracy was at 50-60% range which was simply due to up and down movements being indistinguishable from each other. Our team decided to only train the models for left and right eye movement which improved accuracy to the 80-90% range.  
+The 15,000 values for each event was inputted into the AI model to predict the eye movement direction. Using the collected data, our team trained multiple AI models and tested the accuracy through repeated cross-validation. Initially, accuracy was at 50-60% range which was simply due to up and down movements being indistinguishable from each other. Our team decided to only train the models for left and right movements which greatly improved accuracy. 
+
 
 ## **2.3 Evaluation Strategies** 
 
 #### **Physics Perspective:**
 
 **Recording Performance metrics**  
-
-Utilising separate electrodes instead of a headband allowed for the reduction of overall noise. The variance of noise using the headband was around 20 mV from equilibrium. The use of electrodes reduced the variance down to 5-10 mV. Higher intensities of left and right movement were achieved due to the ability to alter the position of the separate electrodes. Electrode polarity also impacted the output signal of an eye movement. Opposite positions of the electrodes resulted in the troughs and peaks of the eye movement signal to be flipped. Because of this, electrodes were placed in a set configuration during all recording and live streaming sessions. 
-
-Data filtration methods such as the low pass and notch filter allowed for reduction of specific frequency noise. As mentioned before, the selected frequency to be removed was 500 Hz. This chosen frequency provided more accurate measurements of signals from the SpikerBox due to the removal of unwanted frequencies. 
+Batteries not measured at least eight volts by a digital multimeter were replaced. The dual electrode headband was replaced with electrode pads for the positive and negative terminals and allowed for greater control over electrode placement. The position of the two forehead terminals increased the difference in magnitude between up/down events and left/right events. Polarity of electrodes was established by matching the direction of an event to the time series of a previously collected sample. Time domain analysis was applied to samples of length 0.1s in which no event occurred. Counting the number of periods in each sample determined the frequency (450hz) of the implemented notch filter. Live time series were analysed visually to determine the frequency (500hz) of the implemented low pass filter. The low pass filter was not very effective, and frequency domain analysis should have been used to better implement the filter.
 
 <br/>
 
 #### **Data Science Perspective:**
 
 **In-Sample Performance:**  
-The team’s initial approach was to measure in-sample performance through a confusion matrix which will provide a variety of evaluation metrics such as accuracy, precision, sensitivity and F1-score. The accuracy measures how often the SVM classifier correctly predicts the eye-movements as left or right. Precision measures how many of the correctly classified eye-movements actually turned out to be a left eye-movement. Furthermore, sensitivity explains how many of the actual left eye-movements were predicted correctly. Precision and sensitivity can help with seeing the differences between left and right eye-movement signals, to evaluate which eye-movement was easier for the machine to classify. The F1 score is a more balanced and more robust mean which combines both precision and recall into a single measure, capturing both properties. 
+The team’s initial approach was to measure in-sample performance through a confusion matrix which will provide a variety of evaluation metrics such as accuracy, precision, sensitivity and F1-score. Precision and sensitivity can help with seeing the differences between left and right eye-movement signals, to evaluate which eye-movement was easier for the machine to classify. The F1 score is a more balanced and more robust mean which combines both precision and recall into a single measure, capturing both properties. 
 
 **Out-of-Sample Performance:**  
-Although in-sample performance was performed, these evaluation metrics are not protected against over-fitting. In order to evaluate the performance of the classifier when it predicts observations that were not used to build the model, the team used 5-fold cross-validation which will split the samples into folds and use different folds as train and test sets during each iteration. This way, all the data will be fully used both in training and in testing.
+Although in-sample performance was performed, these evaluation metrics are not protected against over-fitting. Thus, the team used 5-fold cross-validation to split the samples and use different folds as train and test sets during each iteration. This way, all the data will be fully used both in training and in testing.
 
-This was further improved by repeating this 50 times. The method repeats the cross-validation multiple times and returns the mean result across all folds from all runs, providing a more robust measure of performance **(see Appendix code 3)**.
+This was further improved through 50 repeated cross-validation, returning the mean result across all folds from all runs, providing a more robust measure of performance **(see Appendix code 3)**.
+
 
 **Stability, Robustness and Generalisability**  
 To measure the stability and robustness of our final product, we guerrilla tested it on all of our group members. We measured the performance on multiple tasks including correct, wrong and no eye movements.
 
+
 # **3 Results** 
 
 ## **3.1 Approach**
-In consideration of multiple evaluation strategies, the approach has been refined to be an application that measures eye-movement reaction time based on a person’s response to flashing tiles. Even though there were multiple ways to achieve this, the team’s approach has been selected to maximise the usefulness, the performance and the reproducibility of the approach with consideration of the limited resources that were provided. 
+Based on the evaluation strategies in our approach, we decided to make an application that measures eye-movement reaction time based on a person’s response to flashing tiles. The team prioritised the usefulness, performance and the reproducibility of the approach in consideration of the limited resources provided.
 
 From a physics perspective, the data collection was performed with electrode stickers rather than a headband since it was shown to give more observable spikes and reduced noise.
 
-From the data science perspective, machine learning was used instead of hard-coding the thresholds to improve reproducibility since it accounts for the variations and the differences in the wave. For building the model, the combination of accuracy, precision, sensitivity, computation time and stability led to the decision that the SVM algorithm was the most accurate and most efficient classifier when it was trained on extracted events.
+From the data science perspective, machine learning was used instead of hard-coding the thresholds to improve reproducibility since it accounts for the variations and the differences in the wave. For building the model, the combination of a high accuracy, precision, sensitivity, computation time and stability led to us choosing the SVM algorithm to train on extracted events.
 
-## **3.1 Tools**
-The tools used to build the GUI were Python and Replit. Replit is a collaboration platform where team members could edit the code and provide feedback. Python was used because the GUI was inspired from the turtle package and the “Simon Says” game, thus Python had packages which were helpful for app development and interface modification.
 
-Event detection and classification were originally performed in R studio. However, the team determined that it will be more cohesive to have the classification integrated into the program. Thus, the classification code was also translated into Python.
+## **3.2 Tools**  
+* Event detection was performed in R studio due to ease of visualisation.  
+* Classification using machine learning was built in Jupyter notebook using Python sklearn packages which made training and evaluating performance intuitive and efficient.  
+* The GUI was built using Jupyter  notebook and Replit. Python had packages for app development and interface modification including turtle.
 
-The tools used to perform machine learning were Python and Jupyter notebook. The variety of packages from sklearn made training the model and evaluating performance intuitive and efficient.
 
 ## **3.3 Innovation**
-The team implemented numerous innovations in our approach to the scientific problem. For filtering the signals, the team used double filters to better reduce noise. For live streaming, the team implemented a calibration phase to take into account the variations in the signals when different people use the SpikerBox. This consequently also improves generalisability of the approach. For event extraction, the team found that the use of only metric was not able to capture the variations in signals when different people used the program. Sometimes, the amplitude of the spike can be either really high or really low. Thus, the team combined both amplitude and zero-crossings for more accurate event detection. For classification, the team also used machine learning rather than hard-coding thresholds to also take into account individual variations for generalisability. The biggest innovation was the GUI itself, which contained interactive text and animated flashlights.
+The team implemented numerous innovations in our approach to the scientific problem. For filtering the signals, the team used double filters to better reduce noise. For live streaming, the team implemented a calibration phase to take into account the variations in the signals when different people use the SpikerBox. This consequently also improves generalisability of the approach. For event extraction, the team found that the use of only metric was not able to capture the variations in signals where the amplitude of the spike can be either really high or really low. Thus, the team combined both amplitude and zero-crossings for more accurate event detection. For classification, the team also used machine learning rather than hard-coding thresholds for generalisability. The biggest innovation was the GUI itself, which contained interactive text and animated flashlights.
 
 ## **3.4 Deployment Process**
-The deployment process involves bringing all components of the project into the GUI. The first stage was to use the SpikerBox to record training data. Then event extraction was performed through R studio and the values saved to a csv file. The csv file is then read into Jupyter Notebook where sklearn builds the SVM model. The SVM model is saved and uploaded to the GUI.
+The deployment process involves integrating all components of the project with the GUI. The first step was to record training data via the SpikerBox. Then event extraction was performed through R studio and saved to a csv file. The file is then read into Jupyter Notebook where sklearn builds the SVM model. The SVM model is uploaded to the GUI.
 
-During the live streaming phase, the program starts with a calibration phase of 10 seconds to find the baseline of the subject. The application starts, showing two tiles and one will eventually flash. The user will perform an eye-movement corresponding to the light that flashed. The GUI detects that eye-movement and the SVM model will classify the eye-movement as either left and right. Once the eye-movement is determined to be correct, the application will return the reaction time. If the eye-movement was incorrect, the user will get another attempt at responding to the light. The program will run for 5 iterations and return the average reaction time **(see Figure 3 and Appendix Code 4).**
+During the live streaming phase, the program starts with a calibration phase of 10 seconds to find the baseline of the subject. The application displays two tiles and one flashes, the user to perform the corresponding eye-movement. The GUI detects the eye-movement and the SVM model will classify it as either left and right. If the eye-movement is determined to be correct, the application will return the reaction time. Otherwise, the user will get another attempt at responding to the light. The program will run for 5 iterations and return the average reaction time **(see Figure 3 and Appendix Code 4).**
 
-The final stage is live testing and the measuring of the performance of the program. The program was tested by multiple students, including students of different genders and different ethnicities. The data was recorded and summaries were produced, including how often the program worked, the average reaction time, the accuracy of the classification.
+The final stage is live testing and evaluating the program performance. The program was tested by multiple students of different genders and different ethnicities. The testing results were recorded and summarised and informed us of how often the program worked, the average reaction time, the accuracy of the classification.
+
 
 ```{r Figure 3, fig.align="left", fig.cap="**Figure 3 Screenshots of our final product.** A - Two tiles appear and instructs subjec to get ready to react. B - One tile will flash. C- Tile turns green if correct input is detected. D - Reaction time is returned."}
 knitr::include_graphics("Product.png")
 ```
 
 ## **3.5 Key Findings** 
+
+#### **Physics**  
+
+Batteries not meeting an 8v charge threshold changed the baseline amplitude of the signal by 100mv. Changing from a headband to electrode pads removed 15mv of noise. Amplitude of events was different by 50mv when using our eyebrow placement compared to temple placement. Combined notch and low pass filtration reduced the amplitude of noise from 30mv to 8mv.
+
 
 #### **In-sample Performance**
 
@@ -244,7 +253,7 @@ After generating a confusion matrix **(see Appendix Figure 1)**, the performance
 #### **Out-of sample Comparison of Classifiers:**  
 In comparison with the other classifiers, it was found that the SVM classifier not only had the highest accuracy of 98% but it also had a relatively fast training time. Therefore, the SVM algorithm was used to build the model **(see Figure 4).**
 
-```{r Figure 4, fig.align="left", fig.cap="**Figure 4 Table of Accuracies and computational time for all classifiers tested.** SVM had the best performance and one fo the fastest computational times"}
+```{r Figure 4, fig.align="left", fig.cap="**Figure 4 Table of Accuracies and computational time for all classifiers tested.** SVM had the best performance and one of the fastest computational times"}
 knitr::include_graphics("Classifiers.png")
 ```
 
@@ -253,13 +262,12 @@ knitr::include_graphics("Classifiers.png")
 
 Our team conducted guerrilla testing to test the usability of the product **(see Figure 5)**. From the feedback, we improved the product GUI to make it more user-friendly and improved the condition of the data collection materials. 
 
-It was found that the program was working consistently and was running to completion. However, the accuracy during live testing was lower than the accuracy of 98% that was produced from cross-validation for the SVM model, This likely occurred due to the fact that many of the live testing signals were different from what the SVM model was trained on, that is the raw data that the team recorded. It was also found that the eye detection process was not as smooth and fluid as anticipated. The program will appear to lag or have a delay when a person looks in a particular direction. Sometimes, the person will have to look aggressively, or even move their eyes multiple times for their eye-movement to be detected. This is likely due to the limitations in the team’s approach to event detection. The detector might have interpreted some eye-movements as noise if it was below the event threshold. 
+The program was working consistently, however, the accuracy during live testing was much lower than our cross-validation accuracy. Many of the live testing signals were different from the raw data that the team recorded and trained on. The eye detection process was not as smooth and fluid as anticipated as the program appears to lag or delay when the participant looks in an invalid direction. Sometimes, the person will have to look multiple times for their eye-movement to be detected. This may be due to the limitations in the approach to event detection in which some eye-movement is interpreted as noise if it was below the event threshold. 
 
-The use of calibration and machine learning to take into account individual variations has increased the generalisability of the product. However, the SVM model was not trained on many edge cases such as small eye-movements which might reduce the robustness of the product. The program could be improved by generalising event detection with an additional calibration instead of using thresholds and more data could be recorded to ensure the robustness of the classifier.
+The use of calibration and machine learning to take into account individual variations has increased the generalisability of the product. However, the SVM model was not trained on many edge cases such as small eye-movements which might reduce the robustness of the product. This could be improved by generalising event detection with an additional calibration instead of using thresholds and more data could be recorded to ensure the robustness of the program.
 
-The findings were limited to the few students that were able to live streaming the program. This means that the findings did not take into account users of different age, health condition or mental capability. More varied samples will be needed to increase the robustness and generalisability of the findings.
 
-```{r Figure 5, fig.align="left", fig.cap="**Figure 5. Guerrilla testing results of final product.**"}
+```{r Figure 5, fig.align="left", fig.cap="**Figure 5. Guerrilla testing results of final product.** All group members tested the product and performed the 7 scenarios. Metric determined in the key was recorded."}
 knitr::include_graphics("Testing.png")
 ```
 
@@ -269,27 +277,56 @@ knitr::include_graphics("Testing.png")
 
 During the development process, our team encountered issues with live-streaming Spikerbox data due to sensitivity to noise and attributes on the participant such as hair. The placement of the electrodes, Spikerbox batteries and electrical leads also seem to skew the quality of the data. The low pass filter threshold may have also affected the input data for the classifier. This input data is used to detect and classify eye movement and the result is used by the GUI for its rendering. All of these processes and computation times affect the accuracy of the reaction time. 
 
-Our team found the product may have issues classifying eye movement on different participants during the testing phase. Since the SVM model was trained with 105 samples, the amount of training data might be too small and hence does not generalise well, likely due to over-fitting. The current product is limited to measuring simple visual reaction time with only one stimulus and hence will restrict the target market and applicability. The application returns the average reaction time hence the iterations of incorrect movement will add zeros and the mean will skew to 0. This will then return quick average reaction times to individuals who mostly look in the incorrect direction. 
+Our team found the product may have issues classifying eye movement on different participants during the testing phase. Since the SVM model was trained with 105 samples, the amount of training data might be too small and hence does not generalise well, likely due to over-fitting^3^. The current product is limited to measuring simple visual reaction time with only one stimulus and hence will restrict the target market and applicability. 
 
 ## **4.2 Future Work** 
 
-The SVM model could be improved by gathering a lot training data. The application failed to identify events of some eye movements hence the low pass filter threshold can be reduced to around 10Hz to prevent this. Our application currently can only classify left and right eye movement. However, in future development it could be expanded to up-down eye movement and muscle signals. This would enable our application to measure complex/choice reaction time which involves response to numerous stimuli and extend target market. The application can also be extended for use in mobile/tablet devices, virtual reality (VR)  and augmented reality (AR) to increase the accessibility. 
+Frequency domain analysis of the signal should have been used to better set the frequencies of filters applied. Fourier space would have significantly improved event detection as we were concerned about amplitude of events.
+
+The SVM model could be improved by gathering more training data on more varied samples to increase the robustness and generalisability of the findings and improve the fit^4^.  The application failed to identify events of some eye movements hence the low pass filter threshold can be reduced to around 10Hz to prevent this. Our application currently can only classify left and right eye movement however in future development it could be expanded to up-down eye movement and muscle signals. This would enable our application to measure complex/choice reaction time which involves response to numerous stimuli and extend the target market. The application can also be extended for use in mobile/tablet devices, virtual reality (VR)  and augmented reality (AR) to increase the accessibility. 
 
 The final product can be improvised as a mobile application which can be used for medical purposes where doctors can review their patients performance and detect any issues. 
 
-# **5 Conclusion**
+# **5 Conclusion** 
+
+Our final product measures simple visual reaction time through the intersection of data science  and physics concepts. The application was built through the steps of EOG data collection, data filtering, streaming event detection, AI modelling classifier and GUI integration. For future work, our application can be extended to measure up-down eye movement, other brain signals and mobile device use. The data collection, filtering and modelling can be improved with more sophisticated equipment and more training data. 
 
 # **6 Student Contributions**
+
+**Kevin Guan**  
+Assisting physics students in getting recording data code in python to work. Set up Github and uploaded all files. Come up with and wrote all R code for event detection and extraction. Extracted all events and generated multiple event csv’s to train classifiers. Converted all detection and extraction code into python. Wrote all live streaming and calibration code in python. Used Gary’s initial GUI code and converted it into our final product with text and reaction time outputs. Troubleshooting final GUI and fixing any code breaking problems. Worked on presentation script and slides, including editing, formatting and timing. Assisted in section 2 and 3 of the report. Editing, formatting and checking the report for any errors. Compiled all the code, text and figures into R for our reproducible report. 
+
+**Gary Lou**  
+Written the code to develop the graphical user interface and the application. Built multiple classifiers and compared performance evaluations of each model, including the production of data summaries and data visualisations. Integrated the SVM model into the product. Implemented the calibration phase and the user interaction code into the product. Assisted other data science students with the live streaming and event detection code. Worked on and assisted other members of the team with the presentation script and slides, the demonstration and as well the report.
+
+**Hamish McFarlane**  
+Worked to develop filtration techniques for SpikerBox data. Assisted in the establishment of the aim and direction of the project. Ensured that students from other disciplines had an ample and consistent supply of data to complete their portion of the project. Shared responsibility for physics contributions to final presentation and project.
+
+**Alen Biju**  
+Worked with the SpikerBox to record data for the classifier. Tuned SpikerBox to reduce overall noise. Helped develop filters for recorded and streamed data. Set up meetings to complete weekly reviews. Provided extra recorded data when necessary. Helped write up and present the final presentation. Worked on the final report assisting with content regarding the physics aspects of the project.
+
+**Harshini Jayakumar**  
+Worked on initial market research for product ideas. Assisted in data collection for the SpikerBox. Participated in meetings to complete weekly reviews. Worked on GUI game development. Designed and created final presentation slides. Shared responsibility towards completion of sections 3, 4, 5 of the report.
+
+**Pearl Pulikkottil**  
+Worked on initial background research and target market research. Participated in meetings for weekly reviews. Worked on event detection in streaming classifier.  Responsible for recording and summarising test results. Worked on layout, design and content of final presentation slides. Worked on final report writing  and editing sections 1, 3, 4, 5.
 
 
 # **7 References** 
 
+1. Backyard Brains. Experiment: Eye Potentials (The EOG). Retrieved May 29, 2022. https://backyardbrains.com/experiments/EOG   
+2. Choi, J., & Twamley, E. W. (2013). Cognitive rehabilitation therapies for Alzheimer's disease: a review of methods to improve treatment engagement and self-efficacy. Neuropsychology review, 23(1), 48–62. https://doi.org/10.1007/s11065-013-9227-4  
+3. Adey, B. (2021, April 27). Investigating ML model accuracy as training size increases. Telstra Purple. Retrieved May 29, 2022, from https://purple.telstra.com/blog/investigating-ml-model-accuracy-as-training-size-increases  
+4. Brownlee, J. (2020, August 25). Impact of dataset size on Deep Learning Model Skill and performance estimates. Machine Learning Mastery. Retrieved May 29, 2022, from https://www.sciencedirect.com/topics/biochemistry-genetics-and-molecular-biology/reaction-time  
+
+
+
 # **8 Appendix**
 
-## Figure 1
+## Appendix Figure 1
 
-Confusion Matrix 
-```{python Confusion Matrix, results = 'hide', cache = TRUE, fig.cap = "**Figure 3** Confusion Matrix for SVM performance. "}
+Confusion Matrix of SVM **(Python-version 3.9.7)**
+```{python Confusion Matrix, results = 'hide', cache = TRUE, fig.cap = "**Figure 1** Confusion Matrix for SVM performance. "}
 import pandas as pd
 from sklearn import svm
 import matplotlib.pyplot as plt
@@ -325,7 +362,7 @@ plt.show()
 
 ## Code 1
 
-Data collection Code. (Python-version 3.9.7)
+Data collection Code. **(Python-version 3.9.7)**
 
 ```{python Data collection, eval = F}
 import serial
@@ -430,7 +467,7 @@ if ser.read():
 
 ## Code 2
 
-The code below was used to extract all left and right events from recorded files. (R-version 4.1.3) 
+The code below was used to extract all left and right events from recorded files. **(R-version 4.1.3)** 
 
 ##### Building Classification Function 
 ```{r Event Classifier}
@@ -659,9 +696,9 @@ Events_final = rbind(left_events, right_events)
 write.csv(test, "Events_final.csv", row.names = F)
 ```
 
-## Code 2
+## Code 3
 
-The code below is for performing 50-repeated 5-fold cross-validation for all machine learning models tested. (Python-version 3.9.7)
+The code below is for performing 50-repeated 5-fold cross-validation for all machine learning models tested. **(Python-version 3.9.7)**
 
 ##### Initialisation 
 ```{python Classifier Initialisation, eval = F}
@@ -825,9 +862,9 @@ plt.xlabel("GB")
 plt.ylabel("Accuracy")
 ```
 
-## Code 3 
+## Code 4 
 
-Our final produce was generated using the code below (Python-version 3.9.7)
+Our final produce was generated using the code below. **(Python-version 3.9.7)**
 
 ```{python, eval = F}
 from random import choice
