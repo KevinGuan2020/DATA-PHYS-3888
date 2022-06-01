@@ -3,7 +3,7 @@ title: "DATA3888/PHYS3888 Brain01 Project Report"
 subtitle: |
   **Github** (https://github.com/KevinGuan2020/DATA-PHYS-3888)     
   **Replit** (https://replit.com/join/kbbefmoroi-gary0505lou)
-author: "Alen Biju, Kevin Guan, Harshini Jayakumar Gary Lou, Hamish McFarlane, Pearl Pulikkottil"
+author: "Alen Biju, Kevin Guan, Harshini Jayakumar, Gary Lou, Hamish McFarlane, Pearl Pulikkottil"
 date: "University of Sydney | Semester 2 2021 | 2022-06-01"
 output:
   rmdformats::downcute:
@@ -294,7 +294,7 @@ Our final product measures simple visual reaction time through the intersection 
 # **6 Student Contributions**
 
 **Kevin Guan**  
-Assisting physics students in getting recording data code in python to work. Set up Github and uploaded all files. Come up with and wrote all R code for event detection and extraction. Extracted all events and generated multiple event csv’s to train classifiers. Converted all detection and extraction code into python. Wrote all live streaming and calibration code in python. Used Gary’s initial GUI code and converted it into our final product with text and reaction time outputs. Troubleshooting final GUI and fixing any code breaking problems. Worked on presentation script and slides, including editing, formatting and timing. Assisted in section 2 and 3 of the report. Editing, formatting and checking the report for any errors. Compiled all the code, text and figures into R for our reproducible report. 
+Assisted Physics students in getting recording data code in python to work. Set up Github and uploaded all files. Come up with and wrote all R code for event detection and extraction. Extracted all events and generated multiple event csv’s to train classifiers. Converted all detection and extraction code into python. Wrote all live streaming and calibration code in python. Used Gary’s initial GUI code and converted it into our final product with text and reaction time outputs. Troubleshooting final GUI and fixing any code breaking problems. Worked on presentation script and slides, including editing, formatting and timing. Assisted in section 2 and 3 of the report. Editing, formatting and checking the report for any errors. Compiled all the code, text and figures into R for our reproducible report. 
 
 **Gary Lou**  
 Written the code to develop the graphical user interface and the application. Built multiple classifiers and compared performance evaluations of each model, including the production of data summaries and data visualisations. Integrated the SVM model into the product. Implemented the calibration phase and the user interaction code into the product. Assisted other data science students with the live streaming and event detection code. Worked on and assisted other members of the team with the presentation script and slides, the demonstration and as well the report.
